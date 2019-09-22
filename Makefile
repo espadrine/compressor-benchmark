@@ -7,7 +7,13 @@ ZSTD = zst
 XZ = xz
 LZIP = lz
 
-all: stats.tsv webster.$(GZIP) webster.$(ZSTD) webster.$(BZIP2) webster.$(BROTLI) webster.$(XZ) webster.$(LZIP) clean
+all: webster stats.tsv webster.$(GZIP) webster.$(ZSTD) webster.$(BZIP2) webster.$(BROTLI) webster.$(XZ) webster.$(LZIP) clean
+
+# Download the Webster collection from the Silesia corpus: http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia
+webster:
+	curl -s http://sun.aei.polsl.pl/~sdeor/corpus/webster.bz2 -O
+	<webster.bz2 bzip2 -d >webster
+	rm webster.bz2
 
 # ratio: size of uncompressed data for every MB of compressed payload.
 # compression: average number of MB that can get compressed every second.
