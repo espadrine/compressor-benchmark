@@ -28,7 +28,7 @@ stats.tsv: Makefile
 
 webster.$(GZIP):
 	compressor=gzip; file=/tmp/webster.$(GZIP); \
-	for l in --best `seq -9 -1`; do \
+	for l in --best `seq -9 -1` --fast; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -46,7 +46,7 @@ webster.$(ZSTD):
 
 webster.$(BZIP2):
 	compressor=bzip2; file=/tmp/webster.$(BZIP2); \
-	for l in --best `seq -9 -1`; do \
+	for l in --best `seq -9 -1` --fast; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -55,7 +55,7 @@ webster.$(BZIP2):
 
 webster.$(BROTLI):
 	compressor=brotli; file=/tmp/webster.$(BROTLI); \
-	for l in --best `seq -9 -1`; do \
+	for l in --best `seq -9 -0` --fast; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -64,7 +64,7 @@ webster.$(BROTLI):
 
 webster.$(XZ):
 	compressor=xz; file=/tmp/webster.$(XZ); \
-	for l in --best `seq -9 -1`; do \
+	for l in --best `seq -9 -1` --fast; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -73,7 +73,7 @@ webster.$(XZ):
 
 webster.$(LZIP):
 	compressor=lzip; file=/tmp/webster.$(LZIP); \
-	for l in --best `seq -9 -1`; do \
+	for l in --best `seq -9 -1` --fast; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
