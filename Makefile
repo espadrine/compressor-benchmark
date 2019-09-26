@@ -80,6 +80,19 @@ webster.$(LZIP):
 	  echo -e "$$compressor $$l\t$$ratio\t$$comp\t$$dec\t$$(bc <<<"scale=3;1/$$ratio+1/$$dec")\t$$(bc <<<"scale=3;1/$$comp+1/$$ratio+1/$$dec")" >>stats.tsv; \
 	done
 
+sending.svg: stats.tsv tables plots sending.plot
+	for compressor in $(COMPRESSORS); do \
+	  <stats.tsv head -1 >tables/"$$compressor".tsv; \
+	  <stats.tsv grep "$$compressor" >>tables/"$$compressor".tsv; \
+	done
+	gnuplot sending.plot >plots/sending.svg
+
+tables:
+	mkdir -p tables
+
+plots:
+	mkdir -p plots
+
 clean:
 	rm -f /tmp/webster.*
 
