@@ -1,13 +1,16 @@
 SHELL = /bin/bash
-SIZE = $$(<webster wc -c)
+SIZE != <webster wc -c
 GZIP = gz
 BZIP2 = bz2
 BROTLI = br
 ZSTD = zst
 XZ = xz
 LZIP = lz
+EXTENSIONS = $(GZIP) $(BZIP2) $(BROTLI) $(ZSTD) $(XZ) $(LZIP)
+WEBSTER_COMPRESSED = $(patsubst %,webster.%,$(EXTENSIONS))
+COMPRESSORS = gzip bzip2 brotli zstd xz lzip
 
-all: webster stats.tsv webster.$(GZIP) webster.$(ZSTD) webster.$(BZIP2) webster.$(BROTLI) webster.$(XZ) webster.$(LZIP) clean
+all: webster stats.tsv $(WEBSTER_COMPRESSED) clean
 
 # Download the Webster collection from the Silesia corpus: http://sun.aei.polsl.pl/~sdeor/index.php?page=silesia
 webster:
@@ -23,12 +26,14 @@ webster:
 #   payload, and uncompressing it on the client?
 # send time: same as load time, including compression time.
 
-stats.tsv: Makefile
-	echo -e 'compressor\tratio\tcompression (MB/s)\tdecompression (MB/s)\tload time (s)\tsend time (s)' >stats.tsv
+stats.tsv: | stats.tsv-header $(WEBSTER_COMPRESSED)
+
+stats.tsv-header:
+	echo -e 'Compressor\tRatio\tCompression (MB/s)\tDecompression (MB/s)\tLoad time (s/MB)\tSend time (s/MB)' >stats.tsv
 
 webster.$(GZIP):
 	compressor=gzip; file=/tmp/webster.$(GZIP); \
-	for l in --best `seq -9 -1` --fast; do \
+	for l in `seq -9 -1`; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -46,7 +51,7 @@ webster.$(ZSTD):
 
 webster.$(BZIP2):
 	compressor=bzip2; file=/tmp/webster.$(BZIP2); \
-	for l in --best `seq -9 -1` --fast; do \
+	for l in `seq -9 -1`; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -55,8 +60,8 @@ webster.$(BZIP2):
 
 webster.$(BROTLI):
 	compressor=brotli; file=/tmp/webster.$(BROTLI); \
-	for l in --best `seq -9 -0` --fast; do \
-	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
+	for l in `seq 0 11`; do \
+	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor -q $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
 	  echo -e "$$compressor $$l\t$$ratio\t$$comp\t$$dec\t$$(bc <<<"scale=3;1/$$ratio+1/$$dec")\t$$(bc <<<"scale=3;1/$$comp+1/$$ratio+1/$$dec")" >>stats.tsv; \
@@ -64,7 +69,7 @@ webster.$(BROTLI):
 
 webster.$(XZ):
 	compressor=xz; file=/tmp/webster.$(XZ); \
-	for l in --best `seq -9 -1` --fast; do \
+	for l in `seq -9 -1` -0; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -73,7 +78,7 @@ webster.$(XZ):
 
 webster.$(LZIP):
 	compressor=lzip; file=/tmp/webster.$(LZIP); \
-	for l in --best `seq -9 -1` --fast; do \
+	for l in `seq -9 -1` -0; do \
 	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
@@ -96,4 +101,4 @@ plots:
 clean:
 	rm -f /tmp/webster.*
 
-.PHONY: all clean
+.PHONY: all stats.tsv-header clean
