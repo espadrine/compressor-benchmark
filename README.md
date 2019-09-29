@@ -1,15 +1,18 @@
 # Compressor benchmark
 
-[Many][zstd benchmark] benchmarks focus on intangible measurements, analyzing the relationship
-between compression speed and ratio without providing intuition as to their
-real-world benefits.
+[Many][zstd benchmark] [benchmarks][mattmahoney] [focus][Lzip benchmark] on
+intangible measurements, analyzing the relationship between compression speed
+and ratio without providing intuition as to their real-world benefits.
+
+(Notable improvements are the [LZ4 benchmark][LZ4] and [Squash][], but they are
+either not as extensive or not as focused as this article.)
 
 This benchmark aims to bridge that gap, while comparing the most widely deployed
 compression schemes in the world.
 
 ## Aims
 
-The motivation for compressing data mostly falls within these categories:
+The motivation for compressing data mostly falls within three categories:
 
 ### 1. Size
 
@@ -20,7 +23,7 @@ MB of content, effectively tripling the amount of disk space.
 
 ![Compression chart](./plots/compression.svg)
 
-The winner there is **lzip**, closely followed by **xz**.
+The winner there is **Lzip**, closely followed by **XZ**.
 
 (Lzip and XZ contain the same compression algorithm, LZMA, which relies on
 range encoding, a derivative of arithmetic coding, a compute-intensive method
@@ -119,14 +122,21 @@ I chose tools that were ❶ readily available, ❷ [popular][Google Trends], and
 address various segments of the Pareto frontier.
 
 <table>
-  <tr><th> Name     <th> Algorithm                   <th> Related archivers
-  <tr><td> gzip     <td> DEFLATE (LZSS, Huffman)     <td> ZIP, PNG
-  <tr><td> bzip2    <td> BWT, MTF, RLE, Huffman      <td>
-  <tr><td> XZ       <td> LZMA (LZ77, range encoding) <td> 7-Zip
-  <tr><td> lzip     <td> LZMA (LZ77, range encoding) <td> 7-Zip
-  <tr><td> Brotli   <td> LZ77, Huffman, context modeling <td> WOFF2
-  <tr><td> LZ4      <td> LZ77                        <td>
-  <tr><td> Zstandard<td> LZ77, tANS, Huffman         <td>
+  <tr><th> Name <th> Algorithm                   <th> Related archivers
+  <tr><td><a href='https://www.gzip.org/'>gzip</a>
+                <td> DEFLATE (LZSS, Huffman)     <td> ZIP, PNG
+  <tr><td><a href='http://sourceware.org/bzip2/'>bzip2</a>
+                <td> BWT, MTF, RLE, Huffman      <td>
+  <tr><td><a href='https://tukaani.org/xz/'>XZ</a>
+                <td> LZMA (LZ77, range encoding) <td> 7-Zip
+  <tr><td><a href='https://www.nongnu.org/lzip/lzip.html'>Lzip</a>
+                <td> LZMA (LZ77, range encoding) <td> 7-Zip
+  <tr><td><a href='https://github.com/google/brotli/blob/master/README.md'>Brotli</a>
+                <td> LZ77, Huffman, context modeling <td> WOFF2
+  <tr><td><a href='https://lz4.github.io/lz4/'>LZ4</a>
+                <td> LZ77                        <td>
+  <tr><td><a href='https://facebook.github.io/zstd/'>Zstandard</a>
+                <td> LZ77, tANS, Huffman         <td>
 </table>
 
 ## Caveats
@@ -138,5 +148,15 @@ address various segments of the Pareto frontier.
   improve their performance on other devices.
 
 [zstd benchmark]: https://raw.githubusercontent.com/facebook/zstd/master/doc/images/DCspeed5.png
+[mattmahoney]: http://mattmahoney.net/dc/text.html
+[Lzip benchmark]: https://www.nongnu.org/lzip/lzip_benchmark.html
+[Squash]: https://quixdb.github.io/squash-benchmark/
 [jdlm]: https://jdlm.info/articles/2017/05/01/compression-pareto-docker-gnuplot.html
 [Google Trends]: https://trends.google.com/trends/explore?cat=32&date=today%205-y&q=%2Fm%2F03bzt,%2Fm%2F0hjcb,%2Fm%2F063ynsr,%2Fg%2F11c1p5xyz2,%2Fm%2F011v70tt
+[gzip]: https://www.gzip.org/
+[bzip2]: http://sourceware.org/bzip2/
+[XZ]: https://tukaani.org/xz/
+[Lzip]: https://www.nongnu.org/lzip/lzip.html
+[Brotli]: https://github.com/google/brotli/blob/master/README.md
+[LZ4]: https://lz4.github.io/lz4/
+[Zstandard]: https://facebook.github.io/zstd/
