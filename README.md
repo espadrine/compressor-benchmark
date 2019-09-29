@@ -1,6 +1,6 @@
-# Compression benchmark
+# Compressor benchmark
 
-Many benchmarks focus on intangible measurements, analyzing the relationship
+[Many][zstd benchmark] benchmarks focus on intangible measurements, analyzing the relationship
 between compression speed and ratio without providing intuition as to their
 real-world benefits.
 
@@ -18,11 +18,32 @@ then is **compression ratio**: how big a megabyte of compressed data is, once
 uncompressed. For instance, a ratio of 3 means that a 1 MB zip on disk stores 3
 MB of content, effectively tripling the amount of disk space.
 
+![Compression chart](./plots/compression.svg)
+
 The winner there is **lzip**, closely followed by **xz**.
 
 (Lzip and XZ contain the same compression algorithm, LZMA, which relies on
 range encoding, a derivative of arithmetic coding, a compute-intensive method
 that has very high compression power.)
+
+Of course, storage costs may need to be balanced against CPU costs of running
+compression. The faster the compression, the lower the CPU cost.
+
+![Compression speed chart](./plots/compression-speed.svg)
+
+Assuming we have a constraint on both parameters computed as a linear
+combination, it is representable as a line on the plot that “falls” from the top
+right. If disk space is more important, the line will be closer to the
+horizontal; if CPU is more relevant, it will be more vertical.
+(That said, [storage costs usually dominate][jdlm].)
+
+A line that is going up is not optimal, so all positive slopes can be discarded.
+If you imagine that line starting horizontal at the top, and slowly sloping
+down, it will come into contact with various compressors, until it reaches a
+vertical state.
+
+That creates a convex hull around the compressors, corresponding to the best
+choices for all weighted compromises between storage and CPU costs.
 
 ### 2. Loading
 
@@ -53,6 +74,8 @@ Therefore, you always get linearly higher download speeds with higher
 compression levels. You want to compare compression software only between the
 flags that yield the highest ratio.
 
+![Loading chart](./plots/loading.svg)
+
 The winner in this field seems to be Zstandard and Brotli, with XZ and Lzip not
 far behind (in this order).
 
@@ -78,6 +101,8 @@ Unlike the decompression speed, the **compression speed** slows linearly with
 the compression level. As a result, the sending time is a U curve over
 compression levels, for any given compressor.
 
+![Sending chart](./plots/sending.svg)
+
 The winner seems to be Zstandard -6, with Brotli -5 not far behind twenty
 milliseconds later. Gzip -5 is relevant again 20 milliseconds later, closely
 followed by bzip2. XZ and Lzip are many tens of milliseconds slower than the
@@ -90,11 +115,14 @@ for each megabyte transmitted.
 
 ## Compression utilities
 
+I chose tools that were ❶ readily available, ❷ [popular][Google Trends], and ❸
+address various segments of the Pareto frontier.
+
 <table>
   <tr><th> Name     <th> Algorithm                   <th> Related archivers
   <tr><td> gzip     <td> DEFLATE (LZSS, Huffman)     <td> ZIP, PNG
   <tr><td> bzip2    <td> BWT, MTF, RLE, Huffman      <td>
-  <tr><td> xz       <td> LZMA (LZ77, range encoding) <td> 7-Zip
+  <tr><td> XZ       <td> LZMA (LZ77, range encoding) <td> 7-Zip
   <tr><td> lzip     <td> LZMA (LZ77, range encoding) <td> 7-Zip
   <tr><td> Brotli   <td> LZ77, Huffman, context modeling <td> WOFF2
   <tr><td> LZ4      <td> LZ77                        <td>
@@ -108,3 +136,7 @@ for each megabyte transmitted.
   file.
 - Certain implementations may make use of CPU-dependent optimizations that can
   improve their performance on other devices.
+
+[zstd benchmark]: https://raw.githubusercontent.com/facebook/zstd/master/doc/images/DCspeed5.png
+[jdlm]: https://jdlm.info/articles/2017/05/01/compression-pareto-docker-gnuplot.html
+[Google Trends]: https://trends.google.com/trends/explore?cat=32&date=today%205-y&q=%2Fm%2F03bzt,%2Fm%2F0hjcb,%2Fm%2F063ynsr,%2Fg%2F11c1p5xyz2,%2Fm%2F011v70tt
