@@ -53,8 +53,8 @@ Therefore, you always get linearly higher download speeds with higher
 compression levels. You want to compare compression software only between the
 flags that yield the highest ratio.
 
-The winner in this field seems to be Brotli, with XZ, Lzip and Zstandard not far
-behind (in this order).
+The winner in this field seems to be Zstandard and Brotli, with XZ and Lzip not
+far behind (in this order).
 
 (At least, at 1 MB/s. As network bandwidth grows closer to the decompression
 speed, the bottleneck becomes decompression. Past a certain point, the
@@ -78,13 +78,33 @@ Unlike the decompression speed, the **compression speed** slows linearly with
 the compression level. As a result, the sending time is a U curve over
 compression levels, for any given compressor.
 
-The winner seems to be Zstandard -7, with Brotli -5 not far behind ten
-milliseconds later. Gzip -5 is relevant again 22 milliseconds later, closely
+The winner seems to be Zstandard -6, with Brotli -5 not far behind twenty
+milliseconds later. Gzip -5 is relevant again 20 milliseconds later, closely
 followed by bzip2. XZ and Lzip are many tens of milliseconds slower than the
 rest even at the lowest compression level.
+
+The big surprise is bzip2. With its consistently high compression speed, it
+remains competitive throughout its levels. If you are ready to compromise
+a tiny bit of transfer time to gain space, you can transmit one more megabyte
+for each megabyte transmitted.
+
+## Compression utilities
+
+<table>
+  <tr><th> Name     <th> Algorithm                   <th> Related archivers
+  <tr><td> gzip     <td> DEFLATE (LZSS, Huffman)     <td> ZIP, PNG
+  <tr><td> bzip2    <td> BWT, MTF, RLE, Huffman      <td>
+  <tr><td> xz       <td> LZMA (LZ77, range encoding) <td> 7-Zip
+  <tr><td> lzip     <td> LZMA (LZ77, range encoding) <td> 7-Zip
+  <tr><td> Brotli   <td> LZ77, Huffman, context modeling <td> WOFF2
+  <tr><td> LZ4      <td> LZ77                        <td>
+  <tr><td> Zstandard<td> LZ77, tANS, Huffman         <td>
+</table>
 
 ## Caveats
 
 - A given algorithm cannot compress all inputs to a smaller size. In particular,
   already-compressed inputs (such as images) might actually compress to a bigger
   file.
+- Certain implementations may make use of CPU-dependent optimizations that can
+  improve their performance on other devices.

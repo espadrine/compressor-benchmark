@@ -1,6 +1,6 @@
 SHELL = /bin/bash
 SIZE != <webster wc -c
-COMPRESSORS = gzip zstd bzip2 brotli xz lzip
+COMPRESSORS = lz4 gzip zstd bzip2 brotli xz lzip
 STATS = $(patsubst %,tables/%.tsv,$(COMPRESSORS))
 
 all: $(STATS) clean
@@ -24,6 +24,16 @@ tables/stats.tsv: webster $(STATS)
 stats.tsv-header:
 	echo -e 'Compressor\tRatio\tCompression (MB/s)\tDecompression (MB/s)\tLoad time (s/MB)\tSend time (s/MB)' >tables/stats.tsv
 
+tables/lz4.tsv:
+	compressor=lz4; file=/tmp/webster.lz4; \
+	echo -e 'Compressor\tRatio\tCompression (MB/s)\tDecompression (MB/s)\tLoad time (s/MB)\tSend time (s/MB)' >$@; \
+	for l in `seq -12 -1`; do \
+	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
+	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
+	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
+	  echo -e "$$compressor $$l\t$$ratio\t$$comp\t$$dec\t$$(bc <<<"scale=3;1/$$ratio+1/$$dec")\t$$(bc <<<"scale=3;1/$$comp+1/$$ratio+1/$$dec")" >>$@; \
+	done
+
 tables/gzip.tsv:
 	compressor=gzip; file=/tmp/webster.gz; \
 	echo -e 'Compressor\tRatio\tCompression (MB/s)\tDecompression (MB/s)\tLoad time (s/MB)\tSend time (s/MB)' >$@; \
@@ -37,8 +47,8 @@ tables/gzip.tsv:
 tables/zstd.tsv:
 	compressor=zstd; file=/tmp/webster.zst; \
 	echo -e 'Compressor\tRatio\tCompression (MB/s)\tDecompression (MB/s)\tLoad time (s/MB)\tSend time (s/MB)' >$@; \
-	for l in `seq -19 -1`; do \
-	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor $$l 2>&1 >$$file)")"; \
+	for l in `seq -22 -1`; do \
+	  comp="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <webster $$compressor --ultra $$l 2>&1 >$$file)")"; \
 	  ratio="$$(bc <<<"scale=3; $(SIZE)/$$(<$$file wc -c)")"; \
 	  dec="$$(bc <<<"scale=3; $(SIZE)/1000000/$$(/usr/bin/time -f '%U' <$$file $$compressor -d 2>&1 >/dev/null)")"; \
 	  echo -e "$$compressor $$l\t$$ratio\t$$comp\t$$dec\t$$(bc <<<"scale=3;1/$$ratio+1/$$dec")\t$$(bc <<<"scale=3;1/$$comp+1/$$ratio+1/$$dec")" >>$@; \
