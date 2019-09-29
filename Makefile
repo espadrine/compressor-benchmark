@@ -94,8 +94,20 @@ tables/lzip.tsv:
 	  echo -e "$$compressor $$l\t$$ratio\t$$comp\t$$dec\t$$(bc <<<"scale=3;1/$$ratio+1/$$dec")\t$$(bc <<<"scale=3;1/$$comp+1/$$ratio+1/$$dec")" >>$@; \
 	done
 
-sending.svg: $(STATS) plots sending.plot
-	gnuplot sending.plot >plots/sending.svg
+plots/sending.svg: $(STATS) plots sending.plot
+	gnuplot sending.plot >$@
+
+plots/loading.svg: $(STATS) plots loading.plot
+	gnuplot loading.plot >$@
+
+plots/compression.svg: $(STATS) plots compression.plot
+	for f in tables/*; do \
+	  <$$f tail -n +2 | sort -k2 -t$$'\t' -r | head -1; \
+	done | sort -k2 -t$$'\t' | \
+	gnuplot compression.plot >$@
+
+plots/compression-speed.svg: $(STATS) plots compression-speed.plot
+	gnuplot compression-speed.plot >$@
 
 tables:
 	mkdir -p tables
