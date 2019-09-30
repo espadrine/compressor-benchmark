@@ -16,10 +16,11 @@ The motivation for compressing data mostly falls within three categories:
 
 ### 1. Size
 
-You wish to reduce *disk, memory or network data use*. What you want to maximize
-then is **compression ratio**: how big a megabyte of compressed data is, once
-uncompressed. For instance, a ratio of 3 means that a 1 MB zip on disk stores 3
-MB of content, effectively tripling the amount of disk space.
+You wish to reduce *disk, memory or network data use*. For instance, you are a
+package distribution service, or store lots of logs or files. What you want to
+maximize then is **compression ratio**: how big a megabyte of compressed data
+is, once uncompressed. For instance, a ratio of 3 means that a 1 MB zip on disk
+stores 3 MB of content, effectively tripling the amount of disk space.
 
 ![Compression chart](./plots/compression.svg)
 
@@ -50,10 +51,11 @@ choices for all weighted compromises between storage and CPU costs.
 
 ### 2. Loading
 
-You want *fast downloads*. To truly shine there, you need to have previously
-compressed the files to disk once. The time needed to get the file loaded from
-the server to your client is the sum of two pieces: first, you need to
-transfer the compressed zip, then the client needs to extract it.
+You want *fast downloads*. For instance, you serve assets for a website.
+To truly shine there, you need to have previously compressed the files to disk
+once. The time needed to get the file loaded from the server to your client is
+the sum of two pieces: first, you need to transfer the compressed zip, then the
+client needs to extract it.
 
 Your hope is that the time won by transfering less bytes will more than make up
 for the time lost by extracting them.
